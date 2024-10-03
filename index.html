@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trailer Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            pointer-events: auto;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        function getEmbedUrl(type, id, season = null, episode = null) {
+            // IMDb ID pattern check
+            if (/^tt\d+$/.test(id)) {
+                if (type === 'movie') {
+                    return `https://player.autoembed.cc/embed/movie/${id}?server=2&autoplay=0`;
+                } else if (type === 'tv') {
+                    return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}?server=2&autoplay=0`;
+                }
+            } else if (!isNaN(id)) {
+                // TMDB ID
+                if (type === 'movie') {
+                    return `https://player.autoembed.cc/embed/movie/${id}?server=2&autoplay=0`;
+                } else if (type === 'tv') {
+                    return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}?server=2&autoplay=0`;
+                }
+            }
+            return null;
+        }
+
+        function previewTrailer(event) {
+            event.preventDefault();
+            const type = document.getElementById('type').value;
+            const id = document.getElementById('id').value;
+            const season = document.getElementById('season').value;
+            const episode = document.getElementById('episode').value;
+
+            const embedUrl = getEmbedUrl(type, id, season, episode);
+            const iframe = document.getElementById('trailerIframe');
+            const result = document.getElementById('result');
+
+            if (embedUrl) {
+                iframe.src = embedUrl;
+                result.classList.remove('hidden');
+            } else {
+                result.innerHTML = "<p>Trailer not available.</p>";
+                result.classList.remove('hidden');
+            }
+        }
+
+        function toggleSeasonEpisodeFields() {
+            const type = document.getElementById('type').value;
+            const seasonEpisodeFields = document.getElementById('seasonEpisodeFields');
+            if (type === 'tv') {
+                seasonEpisodeFields.classList.remove('hidden');
+            } else {
+                seasonEpisodeFields.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const iframe = document.querySelector("iframe");
+            iframe.contentWindow?.addEventListener("click", function (event) {
+                const url = event.target.closest('a')?.href;
+                if (url && !url.includes("player.autoembed.cc")) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Trailer Preview</h1>
+        <form id="trailerForm" onsubmit="previewTrailer(event)">
+            <label for="type">Type:</label>
+            <select name="type" id="type" onchange="toggleSeasonEpisodeFields()">
+                <option value="movie">Movie</option>
+                <option value="tv">TV Show</option>
+            </select>
+            <br><br>
+            <label for="id">ID:</label>
+            <input type="text" name="id" id="id" required>
+            <br><br>
+            <div id="seasonEpisodeFields" class="hidden">
+                <label for="season">Season (for TV shows):</label>
+                <input type="number" name="season" id="season">
+                <br><br>
+                <label for="episode">Episode (for TV shows):</label>
+                <input type="number" name="episode" id="episode">
+                <br><br>
+            </div>
+            <input type="submit" value="Preview Trailer">
+        </form>
+
+        <div id="result" class="hidden">
+            <h2>Trailer Preview:</h2>
+            <iframe id="trailerIframe" allowfullscreen></iframe>
+        </div>
+    </div>
+</body>
+</html>
