@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>devilxstream</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+    <script>
+        function getEmbedUrl(type, id, season = null, episode = null) {
+            // IMDb ID pattern check
+            if (/^tt\d+$/.test(id)) {
+                if (type === 'movie') {
+                    return `https://player.autoembed.cc/embed/movie/${id}?server=2&autoplay=0`;
+                } else if (type === 'tv') {
+                    return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}?server=2&autoplay=0`;
+                }
+            } else if (!isNaN(id)) {
+                // TMDB ID
+                if (type === 'movie') {
+                    return `https://player.autoembed.cc/embed/movie/${id}?server=2&autoplay=0`;
+                } else if (type === 'tv') {
+                    return `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}?server=2&autoplay=0`;
+                }
+            }
+            return null;
+        }
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                type: params.get('type'),
+                id: params.get('id'),
+                season: params.get('season'),
+                episode: params.get('episode')
+            };
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const { type, id, season, episode } = getUrlParams();
+            
+            if (type && id) {
+                const embedUrl = getEmbedUrl(type, id, season, episode);
+                
+                if (embedUrl) {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = embedUrl;
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                    iframe.setAttribute('allow', 'encrypted-media; gyroscope; picture-in-picture');
+                    iframe.setAttribute('allowfullscreen', true);
+                    document.body.appendChild(iframe);
+                } else {
+                    document.body.innerHTML = "<p>Trailer not available.</p>";
+                }
+            } else {
+                document.body.innerHTML = "<p>Invalid parameters.</p>";
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- The iframe will be inserted here by JavaScript -->
+</body>
+</html>
